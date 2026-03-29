@@ -2,7 +2,7 @@
 
 **Your neighborhood isn't AllClear until you are.**
 
-Parcel-level fire preparedness platform for Jackson County, Oregon. Every property gets a unique QR code linking to a personalized fire safety survey. Responses are tied to tax lot account numbers, enabling community-level analytics by HOA, evacuation zone, and neighborhood.
+Parcel-level fire preparedness platform for Jackson County, Oregon. Every property gets a unique QR code linking to a personalized fire safety survey. Responses are tied to tax lot account numbers, enabling community-level analytics by evacuation zone and neighborhood.
 
 ## What It Does
 
@@ -10,7 +10,6 @@ Parcel-level fire preparedness platform for Jackson County, Oregon. Every proper
 - **Unique QR codes** per parcel — scan to open a survey pre-filled with your property data
 - **Evacuation zones** tagged per parcel from the county's official zone service (11,237 Ashland parcels matched)
 - **Owner + occupant postcards** — absentee owners get a named card at their mailing address, tenants get "Current Resident" at the property
-- **31 HOA dossiers** with board contacts, CC&Rs, Firewise status, and meeting schedules
 - **Print-ready CSV export** for variable data postcard printing
 
 ## Pages
@@ -74,10 +73,8 @@ The data was collected from public sources and processed through a pipeline in t
 
 1. **Jackson County ArcGIS REST API** — 104,617 parcels with owner, address, building type, assessed value, tax lot ID
 2. **Jackson County PDO** — 198 subdivision plats linking parcels to platted communities
-3. **Oregon Secretary of State** — HOA nonprofit registrations
-4. **HOA websites** — Board contacts, CC&Rs, Firewise certifications
-5. **County Evacuation Zone API** — 357 zones, spatially queried per parcel centroid
-6. **Hash generation** — HMAC-SHA256 per account+maplot+role, 8-char base62 codes
+3. **County Evacuation Zone API** — 357 zones, spatially queried per parcel centroid
+4. **Hash generation** — HMAC-SHA256 per account+maplot+role, 8-char base62 codes
 
 ## Postcard System
 
@@ -108,7 +105,6 @@ All data sourced from public records:
 - [Jackson County ArcGIS](https://spatial.jacksoncountyor.gov/arcgis/rest/services/OpenData/ReferenceData/MapServer/3) — Tax lot feature service
 - [Jackson County PDO](https://pdo.jacksoncountyor.gov/pdo/) — Property Data Online subdivision records
 - [Jackson County Evacuation Zones](https://services1.arcgis.com/DwYBkWQPdaJNWrPG/arcgis/rest/services/Evacuation_Zones_Jackson_County_Public_ViewTemp/FeatureServer/4) — County-wide evacuation zone polygons
-- [Oregon Secretary of State](https://data.oregon.gov/Business/HOA-Oregon/6rb9-k6mw) — HOA nonprofit registrations
 
 ## Tech Stack
 
