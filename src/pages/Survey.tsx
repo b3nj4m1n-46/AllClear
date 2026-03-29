@@ -10,6 +10,20 @@ interface Parcel {
   mailing_address: string;
   acreage: number;
   year_built: number;
+  city: string;
+  evac_zone: string;
+}
+
+interface Nursery {
+  name: string;
+  city: string;
+  state: string;
+  zip: string;
+  phone: string;
+  email: string;
+  website: string;
+  supply_categories: string;
+  business_type: string;
 }
 
 interface SurveyData {
@@ -58,6 +72,7 @@ export default function Survey() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<SurveyData>(INITIAL_SURVEY);
+  const [nurseries, setNurseries] = useState<Nursery[]>([]);
 
   useEffect(() => {
     if (!hash) return;
@@ -92,6 +107,12 @@ export default function Survey() {
       });
       if (!res.ok) throw new Error("Failed to submit");
       setSubmitted(true);
+      // Fetch nearest nurseries as reward
+      try {
+        const zip = (parcel?.mailing_address || "").match(/\d{5}/)?.[0] || "97520";
+        const nRes = await fetch(`/api/nurseries/near/${zip}?limit=3`);
+        if (nRes.ok) setNurseries(await nRes.json());
+      } catch { /* non-critical */ }
     } catch {
       setError("Failed to submit survey. Please try again.");
     } finally {
@@ -122,6 +143,7 @@ export default function Survey() {
   }
 
   if (submitted) {
+    const couponCode = `ALLCLEAR-${parcel?.account?.slice(-4) || "0000"}`;
     return (
       <div className="survey-container">
         <div className="success-card">
@@ -140,6 +162,55 @@ export default function Survey() {
             Together we're building a more fire-resilient community.
           </p>
         </div>
+
+        {nurseries.length > 0 && (
+          <div className="coupon-section">
+            <h2>Your Reward: Fire-Safe Landscaping Discount</h2>
+            <p className="coupon-intro">
+              As a thank you for participating, enjoy <strong>10% off</strong> fire-resistant
+              plants and landscaping supplies at these nearby nurseries.
+            </p>
+
+            <div className="coupon-card">
+              <div className="coupon-header">
+                <span className="coupon-badge">10% OFF</span>
+                <span className="coupon-label">Fire-Safe Landscaping</span>
+              </div>
+              <div className="coupon-code">
+                <span className="code-label">Your code:</span>
+                <span className="code-value">{couponCode}</span>
+              </div>
+              <p className="coupon-fine-print">
+                Present this code at participating nurseries. Valid for fire-resistant
+                plants, native groundcovers, and defensible space supplies.
+              </p>
+            </div>
+
+            <h3>Nearest Nurseries</h3>
+            <div className="nursery-list">
+              {nurseries.map((n, i) => (
+                <div key={i} className="nursery-card">
+                  <div className="nursery-name">{n.name}</div>
+                  <div className="nursery-location">{n.city}, {n.state} {n.zip}</div>
+                  {n.phone && <div className="nursery-contact">Phone: {n.phone}</div>}
+                  {n.website && (
+                    <a href={n.website.startsWith("http") ? n.website : `https://${n.website}`}
+                       target="_blank" rel="noopener noreferrer" className="nursery-link">
+                      Visit Website
+                    </a>
+                  )}
+                  {n.supply_categories && (
+                    <div className="nursery-categories">
+                      {n.supply_categories.split(";").slice(0, 4).map((c, j) => (
+                        <span key={j} className="category-tag">{c.trim()}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     );
   }

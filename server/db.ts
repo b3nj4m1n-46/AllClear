@@ -69,6 +69,32 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_responses_time ON survey_responses(responded_at);
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS nurseries (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    name         TEXT NOT NULL,
+    business_type TEXT,
+    company_type TEXT,
+    ships_to     TEXT,
+    address      TEXT,
+    city         TEXT,
+    state        TEXT,
+    zip          TEXT,
+    phone        TEXT,
+    fax          TEXT,
+    email        TEXT,
+    website      TEXT,
+    description  TEXT,
+    supply_categories TEXT,
+    slug         TEXT,
+    lat          REAL,
+    lon          REAL
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_nurseries_state ON nurseries(state);
+  CREATE INDEX IF NOT EXISTS idx_nurseries_zip ON nurseries(zip);
+`);
+
 // Add new columns if they don't exist (migration-safe)
 const cols = db.prepare("PRAGMA table_info(parcels)").all().map((c: any) => c.name);
 for (const [col, type] of [["build_code", "INTEGER"], ["comm_sqft", "INTEGER"], ["lot_depth", "INTEGER"], ["lot_width", "INTEGER"], ["evac_zone", "TEXT"], ["evac_city", "TEXT"], ["city", "TEXT"]]) {

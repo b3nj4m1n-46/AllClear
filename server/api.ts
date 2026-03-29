@@ -109,5 +109,65 @@ app.get("/api/stats", (_req, res) => {
   });
 });
 
+// Nearest nurseries to a zip code
+app.get("/api/nurseries/near/:zip", (req, res) => {
+  const zip = req.params.zip;
+  const limit = Math.min(20, parseInt(req.query.limit as string) || 5);
+  const plantOnly = req.query.plants !== "false";
+
+  // Get all nurseries, sorted by zip proximity (simple numeric distance)
+  let where = "state = 'OR'";
+  if (plantOnly) {
+    where += ` AND (
+      business_type LIKE '%Grower%' OR business_type LIKE '%Nursery%' OR business_type LIKE '%Retailer%' OR business_type LIKE '%Garden Center%'
+      OR supply_categories LIKE '%Plants%' OR supply_categories LIKE '%Trees%' OR supply_categories LIKE '%Shrubs%'
+      OR supply_categories LIKE '%Seeds%' OR supply_categories LIKE '%Groundcovers%' OR supply_categories LIKE '%Perennials%'
+    )`;
+  }
+
+  const rows = db
+    .prepare(`SELECT *, ABS(CAST(SUBSTR(zip, 1, 5) AS INTEGER) - CAST(? AS INTEGER)) as zip_dist FROM nurseries WHERE ${where} ORDER BY zip_dist ASC LIMIT ?`)
+    .all(zip.substring(0, 5), limit);
+
+  res.json(rows);
+});
+
+// All nurseries (with optional search and scope)
+app.get("/api/nurseries", (req, res) => {
+  const search = (req.query.search as string) || "";
+  const scope = (req.query.scope as string) || "local"; // local | ships_here | all
+  const limit = Math.min(200, parseInt(req.query.limit as string) || 100);
+
+  // Southern Oregon zip prefixes for "local"
+  const localZips = ['975', '976', '974', '973'];
+
+  let where = "1=1";
+  const params: (string | number)[] = [];
+
+  if (scope === "local") {
+    where += ` AND state = 'OR' AND (${localZips.map(() => "zip LIKE ?").join(" OR ")})`;
+    localZips.forEach(z => params.push(`${z}%`));
+  } else if (scope === "ships_here") {
+    where += " AND ships_to LIKE '%Pacific Northwest%'";
+  }
+  // scope === "all" has no filter
+
+  if (search) {
+    where += " AND (name LIKE ? OR city LIKE ? OR supply_categories LIKE ?)";
+    const term = `%${search}%`;
+    params.push(term, term, term);
+  }
+
+  const total = db
+    .prepare(`SELECT COUNT(*) as count FROM nurseries WHERE ${where}`)
+    .get(...params) as { count: number };
+
+  const rows = db
+    .prepare(`SELECT * FROM nurseries WHERE ${where} ORDER BY name ASC LIMIT ?`)
+    .all(...params, limit);
+
+  res.json({ nurseries: rows, total: total.count });
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`allclear-api: listening on port ${PORT}`));

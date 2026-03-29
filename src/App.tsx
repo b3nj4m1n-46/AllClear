@@ -5,6 +5,7 @@ import PostcardPreview from "./pages/PostcardPreview";
 import Database from "./pages/Database";
 import PrintGuide from "./pages/PrintGuide";
 import ApiDocs from "./pages/ApiDocs";
+import Resources from "./pages/Resources";
 import "./App.css";
 
 function Nav() {
@@ -29,6 +30,9 @@ function Nav() {
         <Link to="/print" className={location.pathname === "/print" ? "active" : ""}>
           Print Guide
         </Link>
+        <Link to="/resources" className={location.pathname === "/resources" ? "active" : ""}>
+          Resources
+        </Link>
         <Link to="/api" className={location.pathname === "/api" ? "active" : ""}>
           API
         </Link>
@@ -47,6 +51,7 @@ function App() {
         <Route path="/postcard" element={<PostcardPreview />} />
         <Route path="/database" element={<Database />} />
         <Route path="/print" element={<PrintGuide />} />
+        <Route path="/resources" element={<Resources />} />
         <Route path="/api" element={<ApiDocs />} />
       </Routes>
     </BrowserRouter>
